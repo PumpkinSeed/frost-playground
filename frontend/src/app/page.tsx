@@ -5,88 +5,101 @@ import {
   Box,
   Heading,
   Text,
-  Button,
   VStack,
-  Input,
+  Badge,
 } from '@chakra-ui/react'
-import {
-  FormControl,
-  FormLabel,
-  FormHelperText,
-} from '@chakra-ui/form-control'
+import { useColorModeValue } from '@chakra-ui/color-mode'
 import { useState } from 'react'
+import { OptionButtons } from './components/KeySetup/OptionButtons'
+import { ImportKey } from './components/KeySetup/ImportKey'
+import { GenerateKey } from './components/KeySetup/GenerateKey'
+import { KeyOption } from './components/KeySetup/types'
 
 export default function Home() {
-  const [selectedOption, setSelectedOption] = useState<'import' | 'generate' | null>(null)
+  const [selectedOption, setSelectedOption] = useState<KeyOption>(null)
   const [privateKey, setPrivateKey] = useState('')
 
+  const bgColor = useColorModeValue('white', 'gray.800')
+  const borderColor = useColorModeValue('gray.100', 'gray.700')
+  const stepBadgeBg = useColorModeValue('blue.50', 'blue.900')
+
+  const handleGenerate = (key: string) => {
+    setPrivateKey(key)
+    // Here you can add logic to move to the next step
+  }
+
   return (
-    <Container maxW="container.md" py={10}>
-      <Box p={8} bg="white" borderRadius="lg" boxShadow="lg">
-        <VStack gap={6}>
-          <Heading textAlign="center">Welcome to Frost Playground</Heading>
-          <Text fontSize="lg" textAlign="center">
-            Do you have a private key or would you like to generate a new one?
-          </Text>
-
-          <VStack gap={4} width="100%">
-            <Button
-              size="lg"
-              colorScheme="blue"
-              onClick={() => setSelectedOption('import')}
-              width="100%"
+    <Box minH="100vh" bg={useColorModeValue('gray.50', 'gray.900')} py={12}>
+      <Container maxW="container.md">
+        <Box 
+          w="full"
+          bg={bgColor}
+          borderRadius="2xl"
+          boxShadow="xl"
+          overflow="hidden"
+          border="1px"
+          borderColor={borderColor}
+        >
+          <Box 
+            bg={stepBadgeBg} 
+            p={4} 
+            borderBottom="1px" 
+            borderColor={borderColor}
+          >
+            <Badge 
+              colorScheme="blue" 
+              fontSize="md" 
+              px={3} 
+              py={1} 
+              borderRadius="full"
             >
-              I have a private key
-            </Button>
-            <Button
-              size="lg"
-              colorScheme="green"
-              onClick={() => setSelectedOption('generate')}
-              width="100%"
-            >
-              Generate new key
-            </Button>
-          </VStack>
-        </VStack>
-      </Box>
+              Step 1 - Set Up Your Private Key
+            </Badge>
+          </Box>
 
-      {selectedOption && (
-        <Box mt={6} p={8} bg="white" borderRadius="lg" boxShadow="lg">
-          <VStack align="stretch" spacing={6}>
-            <Heading size="md">
-              {selectedOption === 'import' ? 'Import Your Private Key' : 'Generate New Key'}
-            </Heading>
-            
-            {selectedOption === 'import' ? (
-              <FormControl>
-                <FormLabel>Enter your private key</FormLabel>
-                <Input
-                  type="text"
-                  value={privateKey}
-                  onChange={(e) => setPrivateKey(e.target.value)}
-                  placeholder="Enter your private key here"
-                  size="lg"
-                />
-                <FormHelperText>
-                  Please enter your private key carefully
-                </FormHelperText>
-                <Button
-                  mt={4}
-                  colorScheme="blue"
-                  width="100%"
-                  isDisabled={!privateKey.trim()}
-                >
-                  Continue
-                </Button>
-              </FormControl>
-            ) : (
-              <Button colorScheme="green" size="lg">
-                Generate Key
-              </Button>
-            )}
-          </VStack>
+          <Box p={8}>
+            <VStack gap={8}>
+              {!selectedOption ? (
+                <VStack gap={6} w="full">
+                  <VStack gap={2}>
+                    <Heading size="lg" textAlign="center">
+                      Welcome to Frost Playground
+                    </Heading>
+                    <Text 
+                      fontSize="lg" 
+                      textAlign="center" 
+                      color={useColorModeValue('gray.600', 'gray.400')}
+                    >
+                      Do you have a private key or would you like to generate a new one?
+                    </Text>
+                  </VStack>
+
+                  <OptionButtons onSelect={setSelectedOption} />
+                </VStack>
+              ) : (
+                <VStack gap={6} w="full">
+                  <Heading size="md">
+                    {selectedOption === 'import' ? 'Import Your Private Key' : 'Generate New Key'}
+                  </Heading>
+                  
+                  {selectedOption === 'import' ? (
+                    <ImportKey
+                      value={privateKey}
+                      onChange={setPrivateKey}
+                      onBack={() => setSelectedOption(null)}
+                    />
+                  ) : (
+                    <GenerateKey
+                      onGenerate={handleGenerate}
+                      onBack={() => setSelectedOption(null)}
+                    />
+                  )}
+                </VStack>
+              )}
+            </VStack>
+          </Box>
         </Box>
-      )}
-    </Container>
+      </Container>
+    </Box>
   )
 }
