@@ -1,15 +1,24 @@
 <script lang="ts">
+    import { page } from '$app/stores';
+
     interface MenuItem {
         text: string;
         href: string;
-        active?: boolean;
     }
 
     const menuItems: MenuItem[] = [
-        { text: 'Setup', href: '/', active: true },
+        { text: 'Setup', href: '/' },
         { text: 'Sign', href: '/sign' },
         { text: 'Verify Signature', href: '/verify' }
     ];
+
+    $: currentPath = $page.url.pathname;
+    $: isActive = (href: string) => {
+        if (href === '/') {
+            return currentPath === '/';
+        }
+        return currentPath.startsWith(href);
+    };
 </script>
 
 <nav class="bg-white shadow-md">
@@ -25,7 +34,7 @@
                         {#each menuItems as item}
                             <a
                                 href={item.href}
-                                class="px-3 py-2 rounded-md text-sm font-medium {item.active 
+                                class="px-3 py-2 rounded-md text-sm font-medium {isActive(item.href)
                                     ? 'bg-blue-500 text-white' 
                                     : 'text-gray-700 hover:bg-gray-100'}"
                             >
