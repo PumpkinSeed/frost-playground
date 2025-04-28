@@ -92,8 +92,6 @@
 </script>
 
 <main class="container mx-auto p-6">
-    <h1 class="text-2xl font-bold mb-6">Frost Step-by-Step Guide</h1>
-    
     <!-- Step 1 -->
     <section class="bg-white shadow-md rounded-lg p-6 max-w-4xl mx-auto mb-8">
         <StepIndicator number={1} title="Private Key Setup" />
