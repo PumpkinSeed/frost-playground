@@ -7,6 +7,7 @@ require (
 	github.com/bytemare/frost v0.0.0-20241019112700-8c6db5b04145
 	github.com/bytemare/secret-sharing v0.7.0
 	github.com/go-chi/chi/v5 v5.2.1
+	github.com/go-chi/cors v1.2.1
 )
 
 require (
