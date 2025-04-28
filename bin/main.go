@@ -26,7 +26,7 @@ func main() {
 
 	slog.Info("decoded scalar", "scalar", scalar2.Hex())
 
-	secretKeyShares, verificationKey, _ := debug.TrustedDealerKeygen(frost.Secp256k1, scalar, 4, 7)
+	secretKeyShares, verificationKey, _ := debug.TrustedDealerKeygen(frost.Secp256k1, scalar2, 4, 7)
 
 	for _, sk := range secretKeyShares {
 		slog.Info("secret key share", "ID", sk.ID, "secret", sk.Secret.Hex())

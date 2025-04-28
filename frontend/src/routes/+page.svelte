@@ -3,6 +3,8 @@
     import KeyOptionSelector from '$lib/components/KeyOptionSelector.svelte';
     import PrivateKeyInput from '$lib/components/PrivateKeyInput.svelte';
     import ActiveKeyDisplay from '$lib/components/ActiveKeyDisplay.svelte';
+    import SplitKeyForm from '$lib/components/SplitKeyForm.svelte';
+    import KeySharesDisplay from '$lib/components/KeySharesDisplay.svelte';
 
     let currentStep = 1;
     let hasExistingKey = false;
@@ -10,6 +12,7 @@
     let activeKey = '';
     let isLoading = false;
     let error = '';
+    let keyShares = [];
 
     async function generateNewKey() {
         isLoading = true;
@@ -51,6 +54,41 @@
             currentStep = 2;
         }
     }
+
+    async function handleSplit(threshold: number, total: number) {
+        isLoading = true;
+        error = '';
+        
+        try {
+            const response = await fetch('http://localhost:3000/split-private-key', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                mode: 'cors',
+                credentials: 'include',
+                body: JSON.stringify({
+                    private_key_hex: activeKey,
+                    threshold,
+                    total
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to split key: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            keyShares = data.key_shars;
+            currentStep = 3;
+        } catch (err) {
+            error = err instanceof Error ? err.message : 'Failed to split key';
+            console.error('Error splitting key:', err);
+        } finally {
+            isLoading = false;
+        }
+    }
 </script>
 
 <main class="container mx-auto p-6">
@@ -87,17 +125,27 @@
     </section>
 
     <!-- Step 2 -->
-    <section class="bg-white shadow-md rounded-lg p-6 max-w-4xl mx-auto {currentStep < 2 ? 'opacity-50' : ''}">
-        <StepIndicator number={2} title="Key Confirmation" />
+    <section class="bg-white shadow-md rounded-lg p-6 max-w-4xl mx-auto mb-8 {currentStep < 2 ? 'opacity-50' : ''}">
+        <StepIndicator number={2} title="Key Split Configuration" />
         
         <ActiveKeyDisplay {activeKey} />
 
-        <button 
-            class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors text-lg font-medium mt-6"
-            disabled={currentStep < 2}
-        >
-            Continue to Next Step
-        </button>
+        {#if currentStep >= 2}
+            <div class="mt-6">
+                <SplitKeyForm 
+                    onSplit={handleSplit}
+                />
+            </div>
+        {/if}
+    </section>
+
+    <!-- Step 3 -->
+    <section class="bg-white shadow-md rounded-lg p-6 max-w-4xl mx-auto {currentStep < 3 ? 'opacity-50' : ''}">
+        <StepIndicator number={3} title="Key Shares" />
+        
+        {#if currentStep >= 3}
+            <KeySharesDisplay {keyShares} />
+        {/if}
     </section>
 </main>
 

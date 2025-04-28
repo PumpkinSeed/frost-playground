@@ -95,7 +95,7 @@ func SplitPrivateKey(w http.ResponseWriter, r *http.Request) {
 	// Decode scalar, hard-coded for now
 	g := ecc.Secp256k1Sha256
 	scalar := g.NewScalar()
-	if err := scalar.DecodeHex(scalar.Hex()); err != nil {
+	if err := scalar.DecodeHex(req.PrivateKeyHex); err != nil {
 		slog.Error("failed to decode hex", slog.Any("error", err))
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
