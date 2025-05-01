@@ -27,6 +27,7 @@ func Run() {
 	r.Post("/commit-key-share", core.CommitKeyShare)
 	r.Post("/sign-key-share", core.SignKeyShareHandler)
 	r.Post("/aggregate-signatures", core.AggregateSignaturesHandler)
+	r.Post("/signature-verification", core.SignatureVerification)
 
 	slog.Info("starting server", slog.String("address", ":3000"))
 	if err := http.ListenAndServe(":3000", r); err != nil {
