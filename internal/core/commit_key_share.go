@@ -1,8 +1,8 @@
 package core
 
 import (
+	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
@@ -40,22 +40,42 @@ func CommitKeyShare(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	verificationKey := ecc.Secp256k1Sha256.Base()
-	if err := verificationKey.DecodeHex(req.VerificationKey); err != nil {
-		slog.ErrorContext(ctx, "failed to decode hex", slog.Any("error", err))
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	responseStruct, err := commitKeyShare(ctx, req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	fmt.Println(req.PublicKeyShares)
+	response, err := json.Marshal(responseStruct)
+	if err != nil {
+		slog.ErrorContext(ctx, "failed to marshal response", slog.Any("error", err))
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	_, err = w.Write(response)
+	if err != nil {
+		slog.ErrorContext(ctx, "failed to write response", slog.Any("error", err))
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+}
+
+func commitKeyShare(ctx context.Context, req CommitKeyShareRequest) (CommitKeyShareResponse, error) {
+	verificationKey := ecc.Secp256k1Sha256.Base()
+	if err := verificationKey.DecodeHex(req.VerificationKey); err != nil {
+		slog.ErrorContext(ctx, "failed to decode hex", slog.Any("error", err))
+		return CommitKeyShareResponse{}, err
+	}
 
 	var publicKeyShares []*keys.PublicKeyShare
 	for _, data := range req.PublicKeyShares {
 		var publicKeyShare = keys.PublicKeyShare{}
 		if err := publicKeyShare.DecodeHex(data); err != nil {
 			slog.ErrorContext(ctx, "failed to decode hex of public key share", slog.Any("error", err))
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			return CommitKeyShareResponse{}, err
 		}
 		publicKeyShares = append(publicKeyShares, &publicKeyShare)
 	}
@@ -71,35 +91,19 @@ func CommitKeyShare(w http.ResponseWriter, r *http.Request) {
 	var secretKeyShare = keys.KeyShare{}
 	if err := secretKeyShare.DecodeHex(req.SecretKeyShare); err != nil {
 		slog.ErrorContext(ctx, "failed to decode hex of secret", slog.Any("error", err))
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return CommitKeyShareResponse{}, err
 	}
 
 	signer, err := configuration.Signer(&secretKeyShare)
 	if err != nil {
 		slog.ErrorContext(ctx, "failed to create signer", slog.Any("error", err))
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
+		return CommitKeyShareResponse{}, err
 	}
 
 	commitment := signer.Commit()
 
-	response, err := json.Marshal(CommitKeyShareResponse{
+	return CommitKeyShareResponse{
 		Signer:     signer.Hex(),
 		Commitment: commitment.Hex(),
-	})
-	if err != nil {
-		slog.ErrorContext(ctx, "failed to marshal response", slog.Any("error", err))
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	_, err = w.Write(response)
-	if err != nil {
-		slog.ErrorContext(ctx, "failed to write response", slog.Any("error", err))
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
+	}, nil
 }
