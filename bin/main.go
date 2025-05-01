@@ -1,9 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"log/slog"
 
-	"github.com/PumpkinSeed/frost-playground/pkg/server"
 	"github.com/bytemare/ecc"
 	"github.com/bytemare/frost"
 	"github.com/bytemare/frost/debug"
@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	server.Run()
+	//server.Run()
 
 	g := ecc.Secp256k1Sha256
 
@@ -47,5 +47,52 @@ func main() {
 
 	if err := configuration.Init(); err != nil {
 		slog.Error("failed to initialize configuration", "error", err)
+	}
+
+	// Create participants
+	var participants []*frost.Signer
+	for _, ks := range secretKeyShares[:4] {
+		signer, err := configuration.Signer(ks)
+		if err != nil {
+			slog.Error("failed to create signer", "error", err)
+			return
+		}
+
+		participants = append(participants, signer)
+	}
+
+	// Create commitments of the participants
+	var commitments []*frost.Commitment
+	for _, participant := range participants {
+		commitments = append(commitments, participant.Commit())
+	}
+
+	message := []byte("Hello, world!")
+
+	var sigShares []*frost.SignatureShare
+	for _, participant := range participants[:4] {
+		sigShare, err := participant.Sign(message, commitments)
+		if err != nil {
+			slog.Error("failed to sign message", "error", err)
+			return
+		}
+
+		sigShares = append(sigShares, sigShare)
+	}
+
+	// Aggregate the signature shares
+	aggSig, err := configuration.AggregateSignatures(message, sigShares, commitments, true)
+	if err != nil {
+		slog.Error("failed to aggregate signatures", "error", err)
+		return
+	}
+	fmt.Println(aggSig.Hex())
+
+	err = frost.VerifySignature(frost.Secp256k1, message, aggSig, verificationKey)
+	if err != nil {
+		slog.Error("failed to verify signature", "error", err)
+		return
+	} else {
+		slog.Info("signature verified")
 	}
 }
