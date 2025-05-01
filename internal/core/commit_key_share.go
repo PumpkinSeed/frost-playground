@@ -7,8 +7,6 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/bytemare/ecc"
-	"github.com/bytemare/frost"
 	"github.com/bytemare/secret-sharing/keys"
 )
 
@@ -66,28 +64,14 @@ func CommitKeyShare(w http.ResponseWriter, r *http.Request) {
 }
 
 func commitKeyShare(ctx context.Context, req CommitKeyShareRequest) (CommitKeyShareResponse, error) {
-	verificationKey := ecc.Secp256k1Sha256.Base()
-	if err := verificationKey.DecodeHex(req.VerificationKey); err != nil {
-		slog.ErrorContext(ctx, "failed to decode hex", slog.Any("error", err))
+	configuration, err := composeConfiguration(ctx, composeConfigurationParams{
+		VerificationKey: req.VerificationKey,
+		PublicKeyShares: req.PublicKeyShares,
+		Threshold:       req.Threshold,
+		Total:           req.Total,
+	})
+	if err != nil {
 		return CommitKeyShareResponse{}, err
-	}
-
-	var publicKeyShares []*keys.PublicKeyShare
-	for _, data := range req.PublicKeyShares {
-		var publicKeyShare = keys.PublicKeyShare{}
-		if err := publicKeyShare.DecodeHex(data); err != nil {
-			slog.ErrorContext(ctx, "failed to decode hex of public key share", slog.Any("error", err))
-			return CommitKeyShareResponse{}, err
-		}
-		publicKeyShares = append(publicKeyShares, &publicKeyShare)
-	}
-
-	configuration := &frost.Configuration{
-		Ciphersuite:           frost.Secp256k1,
-		Threshold:             req.Threshold,
-		MaxSigners:            req.Total,
-		VerificationKey:       verificationKey,
-		SignerPublicKeyShares: publicKeyShares,
 	}
 
 	var secretKeyShare = keys.KeyShare{}
