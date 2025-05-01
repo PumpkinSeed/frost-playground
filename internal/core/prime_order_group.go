@@ -1,9 +1,9 @@
-package server
+package core
 
 import (
-	"github.com/bytemare/ecc"
-	"github.com/bytemare/secret-sharing/keys"
 	"strings"
+
+	"github.com/bytemare/ecc"
 )
 
 const (
@@ -14,32 +14,6 @@ const (
 	edwards25519Sha512 = "Edwards25519-SHA512"
 	secp256k1Sha256    = "Secp256k1-SHA256"
 )
-
-type CreatePrivateKeyRequest struct {
-	PrimeOrderGroup string `json:"prime_order_group"`
-}
-
-type CreatePrivateKeyResponse struct {
-	PrivateKeyHex string `json:"private_key_hex"`
-}
-
-type SplitPrivateKeyRequest struct {
-	PrivateKeyHex string `json:"private_key_hex"`
-	Threshold     uint16 `json:"threshold"`
-	Total         uint16 `json:"total"`
-}
-
-type SplitPrivateKeyResponse struct {
-	KeyShars []KeyShare `json:"key_shars"`
-	Comms    []string   `json:"comms"`
-}
-
-type KeyShare struct {
-	Group   string `json:"group"`
-	SK      string `json:"sk"`
-	Public  string `json:"public"`
-	Details *keys.KeyShare
-}
 
 func GroupToString(group ecc.Group) string {
 	switch group {
