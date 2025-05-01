@@ -2,12 +2,13 @@ package core
 
 import (
 	"encoding/json"
-	"github.com/bytemare/ecc"
-	secretsharing "github.com/bytemare/secret-sharing"
-	"github.com/bytemare/secret-sharing/keys"
 	"io"
 	"log/slog"
 	"net/http"
+
+	"github.com/bytemare/ecc"
+	secretsharing "github.com/bytemare/secret-sharing"
+	"github.com/bytemare/secret-sharing/keys"
 )
 
 type SplitPrivateKeyRequest struct {
@@ -17,15 +18,15 @@ type SplitPrivateKeyRequest struct {
 }
 
 type SplitPrivateKeyResponse struct {
-	KeyShars []KeyShare `json:"key_shars"`
-	Comms    []string   `json:"comms"`
+	KeyShars         []KeyShare `json:"key_shars"`
+	VerificationKeys []string   `json:"verification_keys"`
 }
 
 type KeyShare struct {
-	Group   string `json:"group"`
-	SK      string `json:"sk"`
-	Public  string `json:"public"`
-	Details *keys.KeyShare
+	Group   string         `json:"group"`
+	SK      string         `json:"sk"`
+	Public  string         `json:"public"`
+	Details *keys.KeyShare `json:"details"`
 }
 
 func SplitPrivateKeyHandler(w http.ResponseWriter, r *http.Request) {
@@ -89,8 +90,8 @@ func SplitPrivateKeyHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response, err := json.Marshal(SplitPrivateKeyResponse{
-		KeyShars: shares,
-		Comms:    verificationKeys,
+		KeyShars:         shares,
+		VerificationKeys: verificationKeys,
 	})
 	if err != nil {
 		slog.ErrorContext(ctx, "failed to marshal response", slog.Any("error", err))

@@ -12,7 +12,20 @@
     let activeKey = '';
     let isLoading = false;
     let error = '';
-    let keyShares = [];
+    let keyShares: {
+        group: string;
+        sk: string;
+        public: string;
+        Details: {
+            secret: string;
+            verificationKey: string;
+            publicKey: string;
+            vssCommitment: string[];
+            id: number;
+            group: number;
+        };
+    }[] = [];
+    let verificationKeys: string[] = [];
 
     async function generateNewKey() {
         isLoading = true;
@@ -81,6 +94,7 @@
 
             const data = await response.json();
             keyShares = data.key_shars;
+            verificationKeys = data.verification_keys;
             currentStep = 3;
         } catch (err) {
             error = err instanceof Error ? err.message : 'Failed to split key';
@@ -142,7 +156,7 @@
         <StepIndicator number={3} title="Key Shares" />
         
         {#if currentStep >= 3}
-            <KeySharesDisplay {keyShares} />
+            <KeySharesDisplay {keyShares} {verificationKeys} />
         {/if}
     </section>
 </main>
