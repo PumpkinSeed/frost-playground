@@ -57,13 +57,16 @@ func main() {
 			return
 		}
 
+		fmt.Println("signer", signer.Hex())
 		participants = append(participants, signer)
 	}
 
 	// Create commitments of the participants
 	var commitments []*frost.Commitment
 	for _, participant := range participants {
-		commitments = append(commitments, participant.Commit())
+		commit := participant.Commit()
+		fmt.Println("commitment", commit.Hex())
+		commitments = append(commitments, commit)
 	}
 
 	message := []byte("Hello, world!")

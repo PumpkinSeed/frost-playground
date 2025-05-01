@@ -74,7 +74,7 @@ func SplitPrivateKeyHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		shares[i] = KeyShare{
 			Group:  GroupToString(g),
-			SK:     sk.Secret.Hex(),
+			SK:     sk.Hex(),
 			Public: public.Hex(),
 			Details: &keys.KeyShare{
 				Secret:          sk.Secret,
@@ -99,13 +99,12 @@ func SplitPrivateKeyHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
 	_, err = w.Write(response)
 	if err != nil {
 		slog.ErrorContext(ctx, "failed to write response", slog.Any("error", err))
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 }

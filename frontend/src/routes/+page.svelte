@@ -16,7 +16,7 @@
         group: string;
         sk: string;
         public: string;
-        Details: {
+        details: {
             secret: string;
             verificationKey: string;
             publicKey: string;
@@ -26,6 +26,7 @@
         };
     }[] = [];
     let verificationKeys: string[] = [];
+    let isSaved = false;
 
     async function generateNewKey() {
         isLoading = true;
@@ -103,6 +104,23 @@
             isLoading = false;
         }
     }
+
+    function saveToLocalStorage() {
+        try {
+            const keyData = {
+                privateKey: activeKey,
+                keyShares,
+                verificationKeys,
+                savedAt: new Date().toISOString()
+            };
+            
+            localStorage.setItem('keyData', JSON.stringify(keyData));
+            isSaved = true;
+        } catch (err) {
+            error = 'Failed to save key data to local storage';
+            console.error('Error saving to localStorage:', err);
+        }
+    }
 </script>
 
 <main class="container mx-auto p-6">
@@ -157,6 +175,31 @@
         
         {#if currentStep >= 3}
             <KeySharesDisplay {keyShares} {verificationKeys} />
+            
+            <div class="mt-6 flex items-center gap-4">
+                <button 
+                    on:click={saveToLocalStorage}
+                    class="bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 transition-colors text-lg font-medium flex items-center gap-2"
+                    disabled={isSaved}
+                >
+                    {#if isSaved}
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                        </svg>
+                        Saved
+                    {:else}
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h-2v5.586l-1.293-1.293z"/>
+                            <path d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"/>
+                        </svg>
+                        Save Key Data
+                    {/if}
+                </button>
+                
+                {#if isSaved}
+                    <span class="text-green-600">Successfully saved to local storage!</span>
+                {/if}
+            </div>
         {/if}
     </section>
 </main>

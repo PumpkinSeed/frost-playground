@@ -3,7 +3,7 @@
         group: string;
         sk: string;
         public: string;
-        Details: {
+        details: {
             secret: string;
             verificationKey: string;
             publicKey: string;
@@ -21,7 +21,7 @@
     <div class="grid gap-4">
         {#each keyShares as share}
             <div class="border rounded-lg p-4 bg-gray-50">
-                <h4 class="font-medium mb-2">Share {share.Details.id}</h4>
+                <h4 class="font-medium mb-2">Share {share.details.id}</h4>
                 <div class="grid gap-2 text-sm">
                     <div>
                         <span class="font-medium">Secret:</span>

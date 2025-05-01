@@ -24,6 +24,7 @@ func Run() {
 
 	r.Post("/private-key", core.CreatePrivateKeyHandler)
 	r.Post("/split-private-key", core.SplitPrivateKeyHandler)
+	r.Post("/commit-key-share", core.CommitKeyShare)
 
 	slog.Info("starting server", slog.String("address", ":3000"))
 	if err := http.ListenAndServe(":3000", r); err != nil {
