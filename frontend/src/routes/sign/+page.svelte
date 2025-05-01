@@ -81,7 +81,9 @@
                 body: JSON.stringify({
                     verification_key: savedKeyData?.verificationKeys[0],
                     secret_key_share: share.sk,
-                    public_key_shares: savedKeyData?.keyShares.map(share => share.public)
+                    public_key_shares: savedKeyData?.keyShares.map(share => share.public),
+                    threshold: selectedShares.length,
+                    total: savedKeyData?.keyShares.length
                 })
             });
 

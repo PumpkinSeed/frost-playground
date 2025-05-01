@@ -51,7 +51,15 @@ func main() {
 	// Create participants
 	var participants []*frost.Signer
 	for _, ks := range secretKeyShares[:4] {
-		signer, err := configuration.Signer(ks)
+		ksHex := ks.Hex()
+
+		var secretKeyShare = keys.KeyShare{}
+		if err := secretKeyShare.DecodeHex(ksHex); err != nil {
+			slog.Error("failed to decode hex", "error", err)
+			return
+		}
+
+		signer, err := configuration.Signer(&secretKeyShare)
 		if err != nil {
 			slog.Error("failed to create signer", "error", err)
 			return
@@ -73,7 +81,16 @@ func main() {
 
 	var sigShares []*frost.SignatureShare
 	for _, participant := range participants[:4] {
-		sigShare, err := participant.Sign(message, commitments)
+		parHex := participant.Hex()
+		fmt.Println("participant", parHex)
+
+		var par = &frost.Signer{}
+		if err := par.DecodeHex(parHex); err != nil {
+			slog.Error("failed to decode hex", "error", err)
+			return
+		}
+
+		sigShare, err := par.Sign(message, commitments)
 		if err != nil {
 			slog.Error("failed to sign message", "error", err)
 			return

@@ -1,6 +1,7 @@
 package core
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/bytemare/frost"
 	"io"
@@ -36,34 +37,9 @@ func SignKeyShareHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var participant = &frost.Signer{}
-	if err := participant.DecodeHex(req.Signer); err != nil {
-		slog.Error("failed to decode hex", "error", err)
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
+	responseStruct, err := signKeyShare(ctx, req)
 
-	var commitments []*frost.Commitment
-	for _, commitmentHex := range req.Commitments {
-		var commitment = &frost.Commitment{}
-		if err := commitment.DecodeHex(commitmentHex); err != nil {
-			slog.Error("failed to decode hex", "error", err)
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		commitments = append(commitments, commitment)
-	}
-
-	sigShare, err := participant.Sign([]byte(req.Message), commitments)
-	if err != nil {
-		slog.Error("failed to sign message", "error", err)
-		return
-	}
-
-	response, err := json.Marshal(SignKeyShareResponse{
-		Signature: sigShare.Hex(),
-	})
+	response, err := json.Marshal(responseStruct)
 	if err != nil {
 		slog.ErrorContext(ctx, "failed to marshal response", slog.Any("error", err))
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -78,4 +54,33 @@ func SignKeyShareHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+}
+
+func signKeyShare(_ context.Context, req SignKeyShareRequest) (SignKeyShareResponse, error) {
+	var participant = &frost.Signer{}
+	if err := participant.DecodeHex(req.Signer); err != nil {
+		slog.Error("failed to decode hex", "error", err)
+		return SignKeyShareResponse{}, err
+	}
+
+	var commitments []*frost.Commitment
+	for _, commitmentHex := range req.Commitments {
+		var commitment = &frost.Commitment{}
+		if err := commitment.DecodeHex(commitmentHex); err != nil {
+			slog.Error("failed to decode hex", "error", err)
+			return SignKeyShareResponse{}, err
+		}
+
+		commitments = append(commitments, commitment)
+	}
+
+	sigShare, err := participant.Sign([]byte(req.Message), commitments)
+	if err != nil {
+		slog.Error("failed to sign message", "error", err)
+		return SignKeyShareResponse{}, err
+	}
+
+	return SignKeyShareResponse{
+		Signature: sigShare.Hex(),
+	}, nil
 }

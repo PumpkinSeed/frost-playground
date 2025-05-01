@@ -17,6 +17,8 @@ type CommitKeyShareRequest struct {
 	VerificationKey string   `json:"verification_key"`
 	SecretKeyShare  string   `json:"secret_key_share"`
 	PublicKeyShares []string `json:"public_key_shares"`
+	Threshold       uint16   `json:"threshold"`
+	Total           uint16   `json:"total"`
 }
 
 type CommitKeyShareResponse struct {
@@ -82,8 +84,8 @@ func commitKeyShare(ctx context.Context, req CommitKeyShareRequest) (CommitKeySh
 
 	configuration := &frost.Configuration{
 		Ciphersuite:           frost.Secp256k1,
-		Threshold:             4,
-		MaxSigners:            7,
+		Threshold:             req.Threshold,
+		MaxSigners:            req.Total,
 		VerificationKey:       verificationKey,
 		SignerPublicKeyShares: publicKeyShares,
 	}
