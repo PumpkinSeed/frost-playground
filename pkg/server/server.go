@@ -1,6 +1,9 @@
 package server
 
 import (
+	"embed"
+	"io/fs"
+	"log"
 	"log/slog"
 	"net/http"
 
@@ -9,6 +12,9 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 )
+
+//go:embed build/*
+var embeddedFiles embed.FS
 
 func Run() {
 	r := chi.NewRouter()
@@ -21,6 +27,13 @@ func Run() {
 		AllowCredentials: true,
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	}))
+
+	distFS, err := fs.Sub(embeddedFiles, "build")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	r.Handle("/*", http.FileServer(http.FS(distFS)))
 
 	r.Post("/private-key", core.CreatePrivateKeyHandler)
 	r.Post("/split-private-key", core.SplitPrivateKeyHandler)
