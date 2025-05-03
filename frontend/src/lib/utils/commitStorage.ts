@@ -7,7 +7,7 @@ export interface StoredCommitData {
 
 export function findCommitDataBySecret(secret: string): StoredCommitData | undefined {
     try {
-        const commitData: StoredCommitData[] = JSON.parse(localStorage.getItem('commitData') || '[]');
+        const commitData: StoredCommitData[] = JSON.parse(localStorage.getItem('commit_data') || '[]');
         return commitData.find(data => data.secret === secret);
     } catch (err) {
         console.error('Error finding commit data:', err);
@@ -17,7 +17,7 @@ export function findCommitDataBySecret(secret: string): StoredCommitData | undef
 
 export function getAllCommitData(): StoredCommitData[] {
     try {
-        return JSON.parse(localStorage.getItem('commitData') || '[]');
+        return JSON.parse(localStorage.getItem('commit_data') || '[]');
     } catch (err) {
         console.error('Error getting commit data:', err);
         return [];
@@ -26,7 +26,7 @@ export function getAllCommitData(): StoredCommitData[] {
 
 export function clearCommitData(): void {
     try {
-        localStorage.removeItem('commitData');
+        localStorage.removeItem('commit_data');
     } catch (err) {
         console.error('Error clearing commit data:', err);
     }

@@ -16,12 +16,14 @@
 
     onMount(() => {
         try {
-            // Load saved data from localStorage
             savedMessage = localStorage.getItem('message') || '';
             savedSignature = localStorage.getItem('aggregated_signature') || '';
-            const keyDataStr = localStorage.getItem('keyData');
-            if (keyDataStr) {
-                savedKeyData = JSON.parse(keyDataStr);
+            const verificationKey = localStorage.getItem('verification_key');
+            
+            if (verificationKey) {
+                savedKeyData = {
+                    verificationKeys: [verificationKey]
+                };
             }
         } catch (err) {
             error = 'Failed to load saved data';

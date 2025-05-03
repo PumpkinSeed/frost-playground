@@ -9,7 +9,8 @@
     const menuItems: MenuItem[] = [
         { text: 'Setup', href: '/' },
         { text: 'Sign', href: '/sign' },
-        { text: 'Verify Signature', href: '/verify' }
+        { text: 'Verify Signature', href: '/verify' },
+        { text: 'Clear All Data', href: '/clear' }
     ];
 
     $: currentPath = $page.url.pathname;
@@ -19,6 +20,21 @@
         }
         return currentPath.startsWith(href);
     };
+
+    function clearAllData() {
+        try {
+            localStorage.removeItem('main_private_key');
+            localStorage.removeItem('main_key_shares');
+            localStorage.removeItem('verification_keys');
+            localStorage.removeItem('verification_key');
+            localStorage.removeItem('commit_data');
+            localStorage.removeItem('message');
+            localStorage.removeItem('aggregated_signature');
+            window.location.reload();
+        } catch (err) {
+            console.error('Error clearing localStorage:', err);
+        }
+    }
 </script>
 
 <nav class="bg-white shadow-md">

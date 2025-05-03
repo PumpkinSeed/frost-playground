@@ -34,9 +34,30 @@
 
     onMount(() => {
         try {
-            const storedData = localStorage.getItem('keyData');
-            if (storedData) {
-                savedKeyData = JSON.parse(storedData);
+            // Load key shares and verification key
+            const storedShares = localStorage.getItem('main_key_shares');
+            const verificationKey = localStorage.getItem('verification_key');
+            
+            if (storedShares && verificationKey) {
+                const shares = JSON.parse(storedShares);
+                savedKeyData = {
+                    privateKey: localStorage.getItem('main_private_key') || '',
+                    keyShares: shares.map((share, index) => ({
+                        group: '',
+                        sk: share.secret,
+                        public: share.public,
+                        details: {
+                            secret: share.secret,
+                            verificationKey: verificationKey,
+                            publicKey: share.public,
+                            vssCommitment: [],
+                            id: index + 1,
+                            group: 0
+                        }
+                    })),
+                    verificationKeys: [verificationKey],
+                    savedAt: new Date().toISOString()
+                };
             }
         } catch (err) {
             error = 'Failed to load saved key data';
@@ -103,7 +124,7 @@
             });
             
             // Always overwrite previous data
-            localStorage.setItem('commitData', JSON.stringify(commitData));
+            localStorage.setItem('commit_data', JSON.stringify(commitData));
             isCommitDataSaved = true;
             error = '';
             return true;

@@ -5,6 +5,7 @@
     import ActiveKeyDisplay from '$lib/components/ActiveKeyDisplay.svelte';
     import SplitKeyForm from '$lib/components/SplitKeyForm.svelte';
     import KeySharesDisplay from '$lib/components/KeySharesDisplay.svelte';
+    import { onMount } from 'svelte';
 
     let currentStep = 1;
     let hasExistingKey = false;
@@ -107,20 +108,59 @@
 
     function saveToLocalStorage() {
         try {
-            const keyData = {
-                privateKey: activeKey,
-                keyShares,
-                verificationKeys,
-                savedAt: new Date().toISOString()
-            };
+            // Save private key
+            localStorage.setItem('main_private_key', activeKey);
+
+            // Save key shares in simplified format
+            const simplifiedShares = keyShares.map(share => ({
+                secret: share.sk,
+                public: share.public
+            }));
+            localStorage.setItem('main_key_shares', JSON.stringify(simplifiedShares));
+
+            // Save all verification keys
+            localStorage.setItem('verification_keys', JSON.stringify(verificationKeys));
             
-            localStorage.setItem('keyData', JSON.stringify(keyData));
+            // Save first verification key separately
+            if (verificationKeys.length > 0) {
+                localStorage.setItem('verification_key', verificationKeys[0]);
+            }
+
             isSaved = true;
         } catch (err) {
             error = 'Failed to save key data to local storage';
             console.error('Error saving to localStorage:', err);
         }
     }
+
+    // Update loading from storage if needed
+    onMount(() => {
+        try {
+            const storedPrivateKey = localStorage.getItem('main_private_key');
+            const storedShares = localStorage.getItem('main_key_shares');
+            const storedVerificationKeys = localStorage.getItem('verification_keys');
+
+            if (storedPrivateKey && storedShares && storedVerificationKeys) {
+                activeKey = storedPrivateKey;
+                keyShares = JSON.parse(storedShares).map(share => ({
+                    ...share,
+                    group: '', // Add any required default values
+                    details: {
+                        id: 0,
+                        group: 0,
+                        secret: share.secret,
+                        verificationKey: '',
+                        publicKey: share.public,
+                        vssCommitment: []
+                    }
+                }));
+                verificationKeys = JSON.parse(storedVerificationKeys);
+            }
+        } catch (err) {
+            error = 'Failed to load saved data';
+            console.error('Error loading from localStorage:', err);
+        }
+    });
 </script>
 
 <main class="container mx-auto p-6">
