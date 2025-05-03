@@ -159,9 +159,18 @@
                 throw new Error(`Failed to sign message: ${response.statusText}`);
             }
 
-            const data: SignKeyShareResponse = await response.json();
+            const data = await response.json();
             signatures.set(signer, data.signature);
             signatures = signatures; // Trigger Svelte reactivity
+
+            // Save signature shares to localStorage
+            const signatureShares = Array.from(signatures.entries()).map(([signer, signature]) => ({
+                signer,
+                signature,
+                savedAt: new Date().toISOString()
+            }));
+            localStorage.setItem('shared_signatures', JSON.stringify(signatureShares));
+
         } catch (err) {
             signError = err instanceof Error ? err.message : 'Failed to sign message';
             console.error('Error signing message:', err);

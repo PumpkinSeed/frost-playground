@@ -46,6 +46,7 @@
                 'verification_key',
                 'commit_data',
                 'message',
+                'shared_signatures',
                 'aggregated_signature'
             ];
 
@@ -73,6 +74,7 @@
             localStorage.removeItem('verification_key');
             localStorage.removeItem('commit_data');
             localStorage.removeItem('message');
+            localStorage.removeItem('shared_signatures');
             localStorage.removeItem('aggregated_signature');
             loadStorageData();
         } catch (err) {
@@ -147,6 +149,15 @@
                                     {#each data.parsedValue as key}
                                         <div class="p-2 border rounded" style="word-wrap: break-word; max-width: 60vh; padding: 10px; margin-bottom: 10px;">
                                             <div>{key}</div>
+                                        </div>
+                                    {/each}
+                                </div>
+                            {:else if data.key === 'shared_signatures' && Array.isArray(data.parsedValue)}
+                                <div class="space-y-2">
+                                    {#each data.parsedValue as share}
+                                        <div class="p-2 border rounded" style="word-wrap: break-word; max-width: 60vh; padding: 10px; margin-bottom: 10px;">
+                                            <div style="margin-bottom: 10px;"><span class="font-semibold">Signer:</span> {share.signer}</div>
+                                            <div><span class="font-semibold">Signature:</span> {share.signature}</div>
                                         </div>
                                     {/each}
                                 </div>
