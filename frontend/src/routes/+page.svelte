@@ -6,6 +6,7 @@
     import SplitKeyForm from '$lib/components/SplitKeyForm.svelte';
     import KeySharesDisplay from '$lib/components/KeySharesDisplay.svelte';
     import { onMount } from 'svelte';
+    import { API_URL } from '$lib/config';
 
     let currentStep = 1;
     let hasExistingKey = false;
@@ -34,7 +35,7 @@
         error = '';
         
         try {
-            const response = await fetch('http://localhost:3000/private-key', {
+            const response = await fetch(`${API_URL}/private-key`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -75,7 +76,7 @@
         error = '';
         
         try {
-            const response = await fetch('http://localhost:3000/split-private-key', {
+            const response = await fetch(`${API_URL}/split-private-key`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

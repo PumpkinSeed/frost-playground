@@ -22,4 +22,8 @@ export interface KeyData {
 export interface CommitKeyShareResponse {
     signer: string;
     commitment: string;
+}
+
+export interface AggregateSignaturesResponse {
+    signature: string;
 } 

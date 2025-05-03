@@ -1,6 +1,7 @@
 <script lang="ts">
     import { onMount } from 'svelte';
     import StepIndicator from '$lib/components/StepIndicator.svelte';
+    import { API_URL } from '$lib/config';
 
     interface SignatureVerificationResponse {
         status: string;
@@ -42,7 +43,7 @@
         verificationResult = null;
 
         try {
-            const response = await fetch('http://localhost:3000/signature-verification', {
+            const response = await fetch(`${API_URL}/signature-verification`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

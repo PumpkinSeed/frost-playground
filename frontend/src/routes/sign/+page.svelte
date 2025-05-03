@@ -3,8 +3,9 @@
     import ShareSelector from '$lib/components/ShareSelector.svelte';
     import CommitSharesDisplay from '$lib/components/CommitSharesDisplay.svelte';
     import { onMount } from 'svelte';
-    import type { KeyShare, KeyData, CommitKeyShareResponse } from '$lib/types';
+    import type { KeyShare, KeyData, CommitKeyShareResponse, AggregateSignaturesResponse } from '$lib/types';
     import { getAllCommitData } from '$lib/utils/commitStorage';
+    import { API_URL } from '$lib/config';
 
     let currentStep = 1;
     let selectedShares: KeyShare[] = [];
@@ -78,7 +79,7 @@
         error = '';
 
         try {
-            const response = await fetch('http://localhost:3000/commit-key-share', {
+            const response = await fetch(`${API_URL}/commit-key-share`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -140,7 +141,7 @@
         signError = '';
 
         try {
-            const response = await fetch('http://localhost:3000/sign-key-share', {
+            const response = await fetch(`${API_URL}/sign-key-share`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -186,7 +187,7 @@
 
         try {
             const signatureArray = Array.from(signatures.values());
-            const response = await fetch('http://localhost:3000/aggregate-signatures', {
+            const response = await fetch(`${API_URL}/aggregate-signatures`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
