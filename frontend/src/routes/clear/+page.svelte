@@ -123,34 +123,41 @@
                 {#each storageData as data}
                     <div class="border rounded-lg p-4 bg-gray-50">
                         <h4 class="font-medium text-lg mb-2">{data.key}</h4>
-                        <div class="bg-white p-3 rounded border" style="word-wrap: break-word; max-width: 50vh;">
+                        <div class="bg-white p-3 rounded border" style="word-wrap: break-word; max-width: 60vh;">
                             {#if data.key === 'commit_data' && Array.isArray(data.parsedValue)}
                                 <div class="space-y-2">
                                     {#each data.parsedValue as commit}
-                                        <div class="p-2 border rounded" style="word-wrap: break-word; max-width: 50vh; padding: 10px; margin-bottom: 10px;">
+                                        <div class="p-2 border rounded" style="word-wrap: break-word; max-width: 60vh; padding: 10px; margin-bottom: 10px;">
                                             <div style="margin-bottom: 10px;"><span class="font-semibold">Signer:</span> {commit.signer}</div>
-                                            <div style="margin-bottom: 10px;"><span class="font-semibold">Secret:</span> {commit.secret}</div>
-                                            <div><span class="font-semibold">Saved:</span> {formatDate(commit.savedAt)}</div>
+                                            <div><span class="font-semibold">Secret:</span> {commit.secret}</div>
                                         </div>
                                     {/each}
                                 </div>
                             {:else if data.key === 'main_key_shares' && Array.isArray(data.parsedValue)}
                                 <div class="space-y-2">
                                     {#each data.parsedValue as share}
-                                        <div class="p-2 border rounded" style="word-wrap: break-word; max-width: 50vh; padding: 10px; margin-bottom: 10px;">
+                                        <div class="p-2 border rounded" style="word-wrap: break-word; max-width: 60vh; padding: 10px; margin-bottom: 10px;">
                                             <div style="margin-bottom: 10px;"><span class="font-semibold">Secret:</span> {share.secret}</div>
                                             <div><span class="font-semibold">Public Key:</span> {share.public}</div>
                                         </div>
                                     {/each}
                                 </div>
+                            {:else if data.key === 'verification_keys' && Array.isArray(data.parsedValue)}
+                                <div class="space-y-2">
+                                    {#each data.parsedValue as key}
+                                        <div class="p-2 border rounded" style="word-wrap: break-word; max-width: 60vh; padding: 10px; margin-bottom: 10px;">
+                                            <div>{key}</div>
+                                        </div>
+                                    {/each}
+                                </div>
                             {:else if Array.isArray(data.parsedValue)}
                                 <div class="overflow-x-auto">
-                                    <pre class="text-sm font-mono whitespace-pre-wrap break-words" style="max-width: 50vh;">
+                                    <pre class="text-sm font-mono whitespace-pre-wrap break-words" style="max-width: 60vh;">
                                         {JSON.stringify(data.parsedValue, null, 2)}
                                     </pre>
                                 </div>
                             {:else}
-                                <div class="font-mono text-sm break-words" style="word-wrap: break-word; max-width: 50vh;">
+                                <div class="font-mono text-sm break-words" style="word-wrap: break-word; max-width: 60vh;">
                                     {data.displayValue}
                                 </div>
                             {/if}
