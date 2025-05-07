@@ -1,9 +1,8 @@
 package core
 
 import (
+	"context"
 	"fmt"
-	"github.com/bytemare/secp256k1"
-	"github.com/bytemare/secret-sharing/keys"
 	"log/slog"
 	"math/big"
 	"math/rand"
@@ -11,7 +10,9 @@ import (
 	"testing"
 
 	"github.com/bytemare/ecc"
+	"github.com/bytemare/secp256k1"
 	secretsharing "github.com/bytemare/secret-sharing"
+	"github.com/bytemare/secret-sharing/keys"
 )
 
 type disallowEqual [0]func()
@@ -72,6 +73,7 @@ func TestSplitWithSmallNumbers(t *testing.T) {
 	var g = ecc.Secp256k1Sha256
 
 	// Private key
+	secp256k1.NewScalar()
 	scalar := g.NewScalar()
 	scalar.SetUInt64(privateKey)
 
@@ -90,7 +92,6 @@ func TestSplitWithSmallNumbers(t *testing.T) {
 	//}
 
 	// Verification key
-	basePoint := secp256k1.Element{}
 	verificationKey := g.Base().Multiply(polynomial[0])
 
 	// Key shares
@@ -123,8 +124,36 @@ func TestSplitWithSmallNumbers(t *testing.T) {
 		fmt.Printf("Share %d: %d\n", i+1, hexToUint64(share.Secret.Hex()))
 	}
 	//fmt.Println("Verification Key:", hexToUint64(verificationKey.Hex()))
-	fmt.Println(10)
+
+	commit(secretKeyShares)
 }
+
+func commit(shares []*keys.KeyShare) {
+	var ctx = context.Background()
+	var pkShares = make([]string, len(shares))
+	for i, share := range shares {
+		pkShares[i] = share.PublicKeyShare.Hex()
+	}
+
+	for _, share := range shares {
+		ck, err := commitKeyShare(ctx, CommitKeyShareRequest{
+			Group:           secp256k1Sha256,
+			VerificationKey: shares[0].VerificationKey.Hex(),
+			SecretKeyShare:  share.Hex(),
+			PublicKeyShares: pkShares,
+			Threshold:       3,
+			Total:           5,
+		})
+		if err != nil {
+			slog.ErrorContext(ctx, "failed to commit key share", slog.Any("error", err))
+			return
+		}
+		fmt.Println("Signer:", ck.Signer)
+		fmt.Println("Commitment:", ck.Commitment)
+	}
+}
+
+func sign()
 
 func hexToUint64(hexStr string) uint64 {
 	// Remove optional "0x" or "0X" prefix

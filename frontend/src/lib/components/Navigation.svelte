@@ -10,7 +10,8 @@
         { text: 'Setup', href: '/' },
         { text: 'Sign', href: '/sign' },
         { text: 'Verify Signature', href: '/verify' },
-        { text: 'Clear All Data', href: '/clear' }
+        { text: 'Clear All Data', href: '/clear' },
+        { text: 'Explanation', href: '/explanation' }
     ];
 
     $: currentPath = $page.url.pathname;
